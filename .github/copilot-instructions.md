@@ -1,0 +1,8 @@
+# Copilot Instructions
+
+Follow all rules in `AGENTS.md` at the repo root. Key points:
+
+- Never run `git` or `gh` commands. Only the user does.
+- Show a plan and get approval before any change.
+- Never perform delete operations on a database.
+- Do not take critical actions or decisions alone. Ask the user.

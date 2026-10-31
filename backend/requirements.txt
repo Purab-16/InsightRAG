@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+python-multipart
+httpx
+google-genai
+supabase
+pymupdf
+langchain-text-splitters
+arxiv
+limits
+beautifulsoup4      # stretch
