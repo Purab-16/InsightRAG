@@ -15,6 +15,15 @@ Rule: if a contract in `BACKEND_SCHEMA.md` changes, update that doc first, then 
 
 ---
 
+### 2026-11-01 - Deployed: Render (API) and Vercel (frontend), no code changed
+- Backend runs on Render from `render.yaml` at `https://insightrag-api.onrender.com`; frontend on Vercel at `https://insight-rag-puce.vercel.app`. Secrets were set in the dashboards only. `ALLOWED_ORIGINS` on Render is the exact Vercel URL.
+- Checked after deploy: `/health` is ok; the response headers on Vercel contain CSP (its `connect-src` has the Render and Supabase origins, so the env vars were present at build time), HSTS, `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy` and `Permissions-Policy`; API CORS answers with the exact Vercel origin and the preflight returns 200. A clean headless Chromium load of the live site got guest sign-up 200, `/health`, `/api/papers` and `/api/me/usage` all 200 and the pill showed "API 1531ms". The user ran the smoke test and the app works.
+- Known quirk, left as is (the user's decision): on the user's own browsers (Brave, another Chromium-based one) the "API offline" pill stayed red while the rest of the app worked. The pill is the only call that hits `/health` without a token; the console showed "CORS request did not succeed, status null", a network-level block on that one request, not a server or CORS-header problem. On a cold start the pill can also be red for up to a minute. It is display only.
+- Limits are the same for guests and accounts (`DAILY_PAPER_LIMIT` 5, `DAILY_MESSAGE_LIMIT` 30). The sidebar label "Anonymous tier" is a fixed label and does not change after sign-in. Option noted for later: relabel it ("Guest" or "Account"), or give accounts higher limits (needs a change in `quota.py`, `config.py` and the UI).
+- Decision (from the user): Turnstile is skipped for now. Supabase CAPTCHA must stay off, because the app sends no captcha token and guest sign-in would fail. The abuse limits stay as they are (per-user daily, global AI budget, per-IP burst). To add it later: build the widget, pass `captchaToken` to anonymous sign-in, sign-up and password sign-in, then enable CAPTCHA in Supabase. Google sign-in is not covered by Supabase CAPTCHA.
+- Still open: securityheaders.com grade (the user runs it), Google and email provider setup in Supabase and a real-account test, PDF upload through the UI on Linux (sandbox caps), README screenshots, demo video.
+- Files / docs affected: `docs/progress.md`, `README.md`.
+
 ### 2026-11-01 - Manual checklist run (no code changed)
 - Ran the automatable items of the manual test checklist: 32 API checks across uploads, injection, isolation, limits and rate limiting, a model-level injection test, and a browser rendering check. All passed. Results and the list of what is still open are in `docs/progress.md`.
 - Lesson: my first injection test passed for the wrong reason. The test PDF was one chunk and contained "Ignore previous instructions", so the retrieval filter dropped it and every question got the "couldn't find anything" answer. Rewrote it with a line the filter does not match; the model ignored it.

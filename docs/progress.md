@@ -11,8 +11,10 @@ Tracks what is done and what is next. Update after every finished task. Task num
 ## Current status
 
 - Built and working locally: backend 1.1 to 1.17, frontend 2.1 to 2.9, eval (2.11), mobile and accessibility pass (2.13), security headers (2.13a), dark redesign, PDF export, Google and email accounts with guest-data copy. 2.12 is skipped because the eval already beats the targets.
-- Left: manual test checklist (`IMPLEMENTATION_PLAN.md` section 4), commit and push, deploy (2.10 with 1.18), Turnstile widget, finish README (2.14, needs screenshots and the live URL), demo video (2.15).
+- Deployed 2026-11-01: API on Render (`https://insightrag-api.onrender.com`), frontend on Vercel (`https://insight-rag-puce.vercel.app`). Smoke test done by the user, app works.
+- Left: securityheaders.com grade (user), Google and email provider setup in Supabase with a real-account test, UI PDF upload on the live Linux backend, finish README (2.14, needs screenshots and demo link), demo video (2.15). Turnstile is skipped for now (decision), so Supabase CAPTCHA stays off.
 - Untested with real accounts: email claim, Google claim and sign-in, guest-data copy into a real account, uploaded-PDF move. Supabase "Allow manual linking" must be switched on first.
+- Known quirk: the "API offline" pill can stay red in some browsers (it is the only call to `/health` without a token) while the app works. Left as is.
 - `RATE_LIMIT_PER_MIN` is 60 (code default, `.env.example`, docs)
 ## Prep (Section 0)
 
@@ -47,7 +49,7 @@ Tracks what is done and what is next. Update after every finished task. Task num
 | 1.15 | s2_client, graph builder, graph endpoint | Done (7-day cache in `papers.s2_data`; upload title match; no-match gives center only) |
 | 1.16 | arXiv search endpoint | Done (10-min in-memory cache, `in_library` flag) |
 | 1.17 | Markdown export | Done (paper and chat `.md` downloads; other user gets 404; no token gets 401) |
-| 1.18 | Deploy backend to Render | Deferred to Task 2.10 (deploy with the frontend so CORS gets the Vercel URL once). `render.yaml` written (Python 3.14.6, fallback 3.13). Repo pushed to GitHub |
+| 1.18 | Deploy backend to Render | Done (deployed with 2.10). `https://insightrag-api.onrender.com`, `/health` ok, CORS set to the Vercel URL, `/docs` off in production. Linux sandbox caps (memory, CPU) not yet tested with a bad PDF |
 
 ## Day 2: Frontend and ship
 
@@ -62,7 +64,7 @@ Tracks what is done and what is next. Update after every finished task. Task num
 | 2.7 | Compare page | Done (table for 2 papers, sticky first column, Chat about these) |
 | 2.8 | CitationGraph | Done (React Flow + dagre, filter, side panel, list view; 12 nodes per side). "Add to library" from a node not clicked in the browser |
 | 2.9 | ExportButton | Done (paper and chat `.md` downloads) |
-| 2.10 | Deploy frontend to Vercel | Not started |
+| 2.10 | Deploy frontend to Vercel | Done. `https://insight-rag-puce.vercel.app`. Response headers checked with curl (CSP built from the env vars, HSTS, nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy). Live load in headless Chromium: guest sign-up and all API calls 200. securityheaders.com grade not recorded yet |
 | 2.11 | Eval set and run_eval.py | Done. `run_eval.py` and `questions.jsonl` (20 questions, 5 papers). Full run: hit@5 95% (19 of 20, slack 0), 100% with slack 1; faithfulness 100% yes (20 of 20) |
 | 2.12 | Fix worst eval failures | Skipped: hit@5 95% and faithfulness 100% already beat the targets (75% and 85%). Rerun the eval after any change to chunk size, top-k or prompts |
 | 2.13 | Mobile and accessibility pass | Done (real browser audit at 375 and 1280 px on library, paper, chat tab, compare and chats: no horizontal overflow, 0 axe violations for WCAG 2.0/2.1 A and AA including contrast) |
