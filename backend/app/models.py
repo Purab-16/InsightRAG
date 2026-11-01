@@ -28,16 +28,17 @@ class PaperSummary(BaseModel):
     status: PaperStatus
     status_step: str | None = None
     added_at: datetime
+    published: date | None = None
 
 
 class PaperDetail(PaperSummary):
     abstract: str | None
-    published: date | None
     categories: list[str]
     pdf_url: str | None
     parse_source: Literal["pdf", "html"] | None
     error: str | None
     insights: Insights | None
+    chunk_count: int | None = None
 
 
 class AddArxivRequest(BaseModel):
@@ -147,6 +148,16 @@ class ErrorBody(BaseModel):
     ]
     message: str
     reset_at: datetime | None = None  # only for daily-limit 429s
+
+
+class MergeGuestRequest(BaseModel):
+    guest_token: str = Field(min_length=20, max_length=4000)
+
+
+class MergeGuestResponse(BaseModel):
+    papers_copied: int
+    uploads_moved: int
+    chats_moved: int
 
 
 class Usage(BaseModel):

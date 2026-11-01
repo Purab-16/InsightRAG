@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     daily_paper_limit: int = 5
     daily_message_limit: int = 30
     global_daily_ai_limit: int = 450
-    rate_limit_per_min: int = 20
+    rate_limit_per_min: int = 60
 
     @property
     def is_production(self) -> bool:

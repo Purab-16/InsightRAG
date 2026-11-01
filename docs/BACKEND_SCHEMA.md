@@ -164,15 +164,16 @@ class PaperSummary(BaseModel):
     status: PaperStatus
     status_step: str | None = None
     added_at: datetime
+    published: date | None = None  # null for uploads; added 2026-11-01 for the library Year column
 
 class PaperDetail(PaperSummary):
     abstract: str | None
-    published: date | None
     categories: list[str]
     pdf_url: str | None
     parse_source: Literal["pdf", "html"] | None
     error: str | None
     insights: Insights | None
+    chunk_count: int | None = None  # number of stored chunks; null until the paper is ready
 
 class AddArxivRequest(BaseModel):
     arxiv_id: str  # ID or arXiv URL; normalized server-side
@@ -266,7 +267,17 @@ class Usage(BaseModel):
     messages_used_today: int
     messages_limit: int
     reset_at: datetime                 # next 00:00 UTC
+
+class MergeGuestRequest(BaseModel):
+    guest_token: str                   # access token of the guest session that is being left behind
+
+class MergeGuestResponse(BaseModel):
+    papers_copied: int                 # library entries added to the account
+    uploads_moved: int                 # uploaded PDFs now owned by the account
+    chats_moved: int                   # chat sessions (with their messages) now owned by the account
 ```
+
+**Guest merge (`POST /api/me/merge-guest`).** Called right after a guest signs in to an existing account. The `Authorization` header is the account's token; `guest_token` proves the caller also holds the guest session. The account must not be anonymous and the guest must be anonymous, and they must be different users, otherwise `400 invalid_input` (an expired or bad guest token is `401 unauthorized`). It only adds or updates rows and never deletes: guest library entries are copied into the account's library, uploaded PDFs change owner (the file in the `uploads` bucket is moved to the new owner's folder), and chat sessions change owner and keep their messages. If the account already has an identical upload, the guest's copy is not moved; the account's own copy is used and the moved chats are pointed at it. Safe to repeat.
 
 ## 4. API contracts
 
@@ -290,6 +301,7 @@ class Usage(BaseModel):
 |---|---|---|---|
 | GET | `/health` | — | `{"status":"ok"}` |
 | GET | `/api/me/usage` | — | `Usage` |
+| POST | `/api/me/merge-guest` | `MergeGuestRequest` | `MergeGuestResponse` |
 | GET | `/api/arxiv/search?q=&max_results=10` | query | `{"results": ArxivResult[]}` |
 | POST | `/api/papers/arxiv` | `AddArxivRequest` | `202/200 AddPaperResponse` |
 | POST | `/api/papers/upload` | multipart `file` | `202/200 AddPaperResponse` |
@@ -311,7 +323,7 @@ class Usage(BaseModel):
 
 | Limit | Value (env) | Counted how | Error |
 |---|---|---|---|
-| Burst per IP | 20/min (`RATE_LIMIT_PER_MIN`) | `limits` moving window, in memory | `429` + `Retry-After` |
+| Burst per IP | 60/min (`RATE_LIMIT_PER_MIN`) | `limits` moving window, in memory | `429` + `Retry-After` |
 | New library adds per user per UTC day | 5 (`DAILY_PAPER_LIMIT`) | `count(*) from user_papers where user_id=$1 and added_at >= today_utc` | `429` + `reset_at` |
 | Gemini chat + insights calls, all users, per UTC day | 450 (`GLOBAL_DAILY_AI_LIMIT`) | counter in Postgres, incremented before each call | `429` + `reset_at` |
 | User messages per user per UTC day | 30 (`DAILY_MESSAGE_LIMIT`) | `count(*) from messages m join chat_sessions s on s.id=m.session_id where s.user_id=$1 and m.role='user' and m.created_at >= today_utc` | `429` + `reset_at` |

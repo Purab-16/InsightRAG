@@ -18,20 +18,22 @@
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `--background` | `#FAFAF9` | `#0C0C0E` | Page |
-| `--surface` | `#FFFFFF` | `#16161A` | Cards, panels |
-| `--border` | `#E7E5E4` | `#2A2A30` | Borders, dividers |
-| `--text` | `#1C1917` | `#EDEDEF` | Primary text |
-| `--text-muted` | `#78716C` | `#A1A1AA` | Secondary text, metadata |
-| `--primary` | `#4F46E5` (indigo) | `#818CF8` | Buttons, links, active tab, center graph node |
-| `--primary-soft` | `#EEF2FF` | `#1E1B4B` | Citation chip background, selected rows |
+| `--background` | `#FAFAF9` | `#0A0A0C` | Page |
+| `--surface` | `#FFFFFF` | `#111114` | Cards, panels |
+| `--border` | `#E7E5E4` | `#26262C` | Borders, dividers |
+| `--text` | `#1C1917` | `#F4F4F5` | Primary text |
+| `--text-muted` | `#78716C` | `#9A9AA3` | Secondary text, metadata |
+| `--primary` | `#4F46E5` (indigo) | `#A78BFA` (violet) | Buttons, links, active nav, center graph node |
+| `--primary-soft` | `#EEF2FF` | `#2A2147` | Citation chip background, selected rows |
 | `--success` | `#16A34A` | `#4ADE80` | Ready badge |
 | `--warning` | `#D97706` | `#FBBF24` | Processing badge |
 | `--danger` | `#DC2626` | `#F87171` | Failed badge, errors |
 | `--graph-ref` | `#0EA5E9` | `#38BDF8` | Reference nodes |
 | `--graph-cite` | `#A855F7` | `#C084FC` | Citation nodes |
 
-Map these to shadcn's theme variables. Support dark mode via `class` strategy and `prefers-color-scheme` default.
+Map these to shadcn's theme variables. Dark mode via `class` strategy. **Dark is the default theme** (2026-11-01 redesign); the header toggle switches to light.
+
+**Redesign (2026-11-01):** desktop uses a left sidebar (Paper Library, RAG Workspace, Compare Insights) plus a slim top bar with usage pills. Small labels use the `.label-mono` style (JetBrains Mono, uppercase, wide tracking). Mobile keeps the slide-in menu.
 
 ### 2.2 Typography
 - UI font: **Inter** (Google Fonts). Reading font for answers and insights: **Inter** at 16 px / 1.65 line height (optionally **Source Serif 4** for paper titles).

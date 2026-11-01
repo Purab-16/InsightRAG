@@ -58,7 +58,24 @@ def _summary_fields(row: dict) -> dict:
         "status": "failed" if stuck else paper["status"],
         "status_step": None if stuck else paper["status_step"],
         "added_at": row["added_at"],
+        "published": paper["published"],
     }
+
+
+def _chunk_count(paper: dict) -> int | None:
+    """Read-only count of a paper's chunks. A failed count must never break the paper page."""
+    try:
+        res = (
+            get_db()
+            .table("chunks")
+            .select("id", count="exact")
+            .eq("paper_id", paper["id"])
+            .limit(1)
+            .execute()
+        )
+        return res.count
+    except Exception:
+        return None
 
 
 def _library_row(user_id: UUID, paper_id: UUID) -> dict:
@@ -269,7 +286,7 @@ def get_paper(paper_id: UUID, user_id: UUID = Depends(get_user_id)):
     return PaperDetail(
         **fields,
         abstract=paper["abstract"],
-        published=paper["published"],
+        chunk_count=_chunk_count(paper) if fields["status"] == "ready" else None,
         categories=paper["categories"],
         pdf_url=paper["pdf_url"],
         parse_source=paper["parse_source"],

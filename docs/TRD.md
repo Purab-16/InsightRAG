@@ -155,7 +155,7 @@ PARSE_MEMORY_MB=300
 DAILY_PAPER_LIMIT=5
 DAILY_MESSAGE_LIMIT=30
 GLOBAL_DAILY_AI_LIMIT=450    # all users combined; model free tier is 500 requests/day
-RATE_LIMIT_PER_MIN=20        # per IP, all /api routes
+RATE_LIMIT_PER_MIN=60        # per IP, all /api routes
 ```
 
 ### Frontend `.env.local`
@@ -226,7 +226,7 @@ NEXT_PUBLIC_TURNSTILE_SITE_KEY=
 | Layer | Limit | How |
 |---|---|---|
 | Sign-up | Turnstile CAPTCHA on anonymous sign-in | Supabase Auth → Bot and Abuse Protection; frontend passes `captchaToken` |
-| Per IP (burst) | `RATE_LIMIT_PER_MIN` (20/min) on `/api/*` | `limits` moving window in `app/limiter.py` (slowapi's middleware skips nested routers); run uvicorn with `--proxy-headers --forwarded-allow-ips='*'` so the real client IP is used on Render |
+| Per IP (burst) | `RATE_LIMIT_PER_MIN` (60/min) on `/api/*` | `limits` moving window in `app/limiter.py` (slowapi's middleware skips nested routers); run uvicorn with `--proxy-headers --forwarded-allow-ips='*'` so the real client IP is used on Render |
 | Per user / day | `DAILY_PAPER_LIMIT` (5) new library adds, `DAILY_MESSAGE_LIMIT` (30) messages | Count rows in Postgres since 00:00 UTC before doing work |
 | Global / day | `GLOBAL_DAILY_AI_LIMIT` (450) chat + insights calls, all users | Counter in Postgres (UTC day); over budget → `429` with `reset_at` |
 | Per request | Message ≤ 2000 chars, 1–5 papers/session, 2–3 papers/compare, search `q` ≤ 200 chars | Pydantic validation |
