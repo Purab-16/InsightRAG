@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import subprocess
 import sys
@@ -7,7 +8,9 @@ from pathlib import Path
 from app.config import get_settings
 from parsers.types import Block, ParsedPaper
 
-BACKEND_DIR = Path(__file__).resolve().parent.parent
+log = logging.getLogger("insightrag.sandbox")
+
+BACKEND_DIR =Path(__file__).resolve().parent.parent
 
 # The worker gets only these variables, so API keys in the environment never reach it.
 _ENV_KEEP = ("PATH", "SYSTEMROOT", "WINDIR", "TEMP", "TMP", "LANG", "LC_ALL")
@@ -49,6 +52,11 @@ def parse_pdf_safely(pdf_bytes: bytes) -> ParsedPaper:
         raise ParseError("This PDF took too long to read. Try a shorter or simpler file.")
 
     if proc.returncode != 0:
+        log.error(
+            "pdf worker exited with code %s: %s",
+            proc.returncode,
+            proc.stderr[-2000:].decode("utf-8", errors="replace"),
+        )
         raise ParseError(_UNREADABLE)
 
     try:

@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     max_upload_mb: int = 20
     max_pdf_pages: int = 100
     parse_timeout_s: int = 60
-    parse_memory_mb: int = 300
+    parse_memory_mb: int = 1024
 
     daily_paper_limit: int = 5
     daily_message_limit: int = 30
